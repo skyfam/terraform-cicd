@@ -1,0 +1,9 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - terraform init
+  build:
+    commands:
+      - terraform apply -auto-approve
