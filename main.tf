@@ -2,12 +2,12 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-resource "aws_s3_bucket" "codepipeline_artifacts" {
-  bucket = "terraform-cicd-aws-pipeline-artifacts"
-}
+# resource "aws_s3_bucket" "codepipeline_artifacts" {
+#   bucket = "terraform-cicd-aws-pipeline-artifacts"
+# }
 
 resource "aws_iam_role" "codepipeline_role" {
-  name = "codepipeline-role"
+  name               = "codepipeline-role"
   assume_role_policy = data.aws_iam_policy_document.codepipeline_assume.json
 }
 
@@ -23,10 +23,10 @@ data "aws_iam_policy_document" "codepipeline_assume" {
 
 resource "aws_iam_role_policy_attachment" "codepipeline_attach" {
   role       = aws_iam_role.codepipeline_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipeline_FullAccesss"
 }
 
-resource "aws_codepipeline" "vpc_pipeline" {
+resource "aws_codepipeline" "terraform_plan" {
   name     = "vpc-cicd-pipeline"
   role_arn = aws_iam_role.codepipeline_role.arn
 
@@ -57,16 +57,16 @@ resource "aws_codepipeline" "vpc_pipeline" {
   stage {
     name = "Plan"
     action {
-      name            = "TerraformPlan"
-      category        = "Build"
-      owner           = "AWS"
-      provider        = "CodeBuild"
+      name             = "TerraformPlan"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
       version          = "1"
-      input_artifacts = ["source_output"]
+      input_artifacts  = ["source_output"]
       output_artifacts = ["plan_output"]
 
       configuration = {
-        ProjectName = aws_codebuild_project.terraform_plan.name
+        ProjectName = "terraform-cicd-plan"
       }
     }
   }
@@ -78,11 +78,11 @@ resource "aws_codepipeline" "vpc_pipeline" {
       category        = "Build"
       owner           = "AWS"
       provider        = "CodeBuild"
-      version          = "1"
+      version         = "1"
       input_artifacts = ["source_output"]
 
       configuration = {
-        ProjectName = aws_codebuild_project.terraform_apply.name
+        ProjectName = "terraform-cicd-apply"
       }
     }
   }
@@ -90,7 +90,7 @@ resource "aws_codepipeline" "vpc_pipeline" {
 
 
 resource "aws_iam_role" "codebuild_role" {
-  name = "codebuild-role"
+  name               = "codebuild-role"
   assume_role_policy = data.aws_iam_policy_document.codebuild_assume.json
 }
 
